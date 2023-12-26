@@ -1,7 +1,7 @@
 pkgname="gcc-latest-bin"
 pkgver=14.0.0_20231224gita657c7e3518f
 pkgrel=1
-pkgdesc="GCC latest binary builds"
+pkgdesc="GCC latest binary builds from https://jwakely.github.io/pkg-gcc-latest/"
 arch=(x86_64)
 makedepends=()
 source=("gcc-latest-bin.deb")
@@ -28,7 +28,7 @@ build() {
 package() {
     cd "$pkgdir"
     tar xfv "$srcdir/deb-unpack/data.tar.xz"
-    for DIR in bin "include/c++" lib lib64
+    for DIR in bin "include/c++" lib lib64 "share/info" "share/man/man1" "share/man/man7" "share/$(ls "$pkgdir/opt/gcc-latest/share" | grep gcc)"
     do
         DEST="/usr/$DIR"
         case "$DIR" in
