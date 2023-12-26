@@ -1,0 +1,47 @@
+pkgname="gcc-latest-bin"
+pkgver=14.0.0_20231224gita657c7e3518f
+pkgrel=1
+pkgdesc="GCC latest binary builds"
+arch=(x86_64)
+makedepends=()
+source=("gcc-latest-bin.deb")
+md5sums=("SKIP")
+provides=("gcc" "gcc-libs" "lib32-gcc-libs")
+conflicts=("gcc" "gcc-libs" "lib32-gcc-libs")
+
+pkgver() {
+    if [ ! -f ../gcc-latest-bin.deb ]
+    then
+        >&2 echo "Please download the latest GCC .deb file from https://jwakely.github.io/pkg-gcc-latest/ and put it as gcc-latest-bin.deb in the same directory as this PKGBUILD"
+        exit 1
+    fi
+    ar p ../gcc-latest-bin.deb control.tar.gz | tar xz ./control -O | grep Version | sed 's/Version: //;s/-/_/'
+}
+
+build() {
+    [ ! -d deb-unpack ] && mkdir deb-unpack
+    cd deb-unpack
+    ar xv ../../gcc-latest-bin.deb
+    cd ..
+}
+
+package() {
+    cd "$pkgdir"
+    tar xfv "$srcdir/deb-unpack/data.tar.xz"
+    for DIR in bin "include/c++" lib lib64
+    do
+        DEST="/usr/$DIR"
+        case "$DIR" in
+            "lib64")
+                DEST="/usr/lib"
+                ;;
+        esac
+
+        mkdir -p "$pkgdir/$DEST"
+        for FILE in $(ls "$pkgdir/opt/gcc-latest/$DIR")
+        do
+            ln -s /opt/gcc-latest/$DIR/$FILE "$pkgdir/$DEST/$FILE"
+        done
+    done
+    "$pkgdir"/opt/gcc-latest/libexec/gcc/x86_64-pc-linux-gnu/14.0.0/install-tools/mkheaders "$pkgdir"/opt/gcc-latest/
+}
